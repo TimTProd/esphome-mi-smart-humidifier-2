@@ -1,0 +1,217 @@
+external_components:
+  - source: github://dhewg/esphome-miot@main
+    refresh: 0s
+
+substitutions:
+  name: smart-humidifier-2
+  board: bw15
+  device_description: Smart Humidifier 2
+
+esphome:
+  name: ${name}
+  comment: ${device_description}
+  project:
+    name: "dhewg.esphome-miot"
+    version: "deerma.humidifier.jsq2g"
+
+rtl87xx:
+  board: ${board}
+  framework:
+    version: 0.0.0
+    source: https://github.com/prokoma/libretiny#55aacc8
+
+logger:
+  level: DEBUG
+  baud_rate: 0
+
+wifi:
+  ssid: "SSID"
+  password: "PASSWORD"
+  ap:
+    ssid: ${name}
+    password: "aboba123"
+
+api:
+  encryption:
+    key: "API_KEY"
+  reboot_timeout: 0s
+  services:
+    - service: mcu_command
+      variables:
+        command: string
+      then:
+        - lambda: |-
+            id(miot_main).queue_command(command);
+
+ota:
+  - platform: esphome
+    password: "OTA_PASSWORD"
+
+# --- MIoT bus (inter-MCU UART) ---
+uart:
+  id: miot_uart
+  rx_pin: GPIO13
+  tx_pin: GPIO14
+  baud_rate: 115200
+  # debug:   
+  #   direction: BOTH
+  #   sequence:
+  #     - lambda: |-
+  #         if (!bytes.empty()) {
+  #           std::string line;
+  #           line.reserve(bytes.size()*3);
+  #           for (auto b : bytes) {
+  #             char buf[4];
+  #             snprintf(buf, sizeof(buf), "%02X ", b);
+  #             line += buf;
+  #           }
+  #           ESP_LOGD("uart.debug", "%s", line.c_str());
+  #         }
+
+miot:
+  id: miot_main
+  uart_id: miot_uart
+
+# --- Controls / Status ---
+
+button:
+  - platform: restart
+    name: "${name} Restart"
+    entity_category: diagnostic
+
+  - platform: template
+    name: "${name} Start Humidifying"
+    icon: mdi:play
+    on_press:
+      - switch.turn_on: power_sw
+      - delay: 200ms
+      - select.set:
+          id: mode_select
+          option: "Constant Humidity"  
+      - number.set:
+          id: target_hum
+          value: 55
+      - number.set:
+          id: fan_level
+          value: 2   
+
+  - platform: template
+    name: "${name} Stop Humidifying"
+    icon: mdi:stop
+    on_press:
+      - switch.turn_off: power_sw
+
+binary_sensor:
+  - platform: status
+    name: "${name} Connection Status"
+
+  - platform: miot
+    miot_siid: 5
+    miot_piid: 1
+    name: "${name} Alarm"
+
+text_sensor:
+  - platform: version
+    name: "${name} Esphome Version"
+
+  - platform: wifi_info
+    ip_address:
+      name: ESP IP Address
+    mac_address:
+      name: ESP Mac Wifi Address
+
+  - platform: miot
+    miot_siid: 2
+    miot_piid: 2
+    name: "${name} Device Fault"
+    entity_category: diagnostic
+    filters:
+      - map:
+        - "0 -> No Fault"
+        - "1 -> Insufficient Water"
+        - "2 -> Water Separation"
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    internal: true
+    entity_category: diagnostic
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "${name} WiFi Signal Percent"
+    unit_of_measurement: "Signal %"
+    entity_category: diagnostic
+    device_class: ""
+    icon: mdi:wifi
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+
+  # Environment (SIID 3)
+  - platform: miot
+    miot_siid: 3
+    miot_piid: 1
+    name: "${name} Humidity"
+    unit_of_measurement: "%"
+    device_class: humidity
+    state_class: measurement
+
+  - platform: miot
+    miot_siid: 3
+    miot_piid: 7
+    name: "${name} Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+switch:
+  - platform: miot
+    miot_siid: 2
+    miot_piid: 1
+    name: "${name} Power"
+    id: power_sw
+    internal: true
+    icon: mdi:power
+
+select:
+  - platform: miot
+    id: mode_select
+    miot_siid: 2
+    miot_piid: 8
+    name: "${name} Mode"
+    icon: mdi:auto-mode
+    internal: false
+    options:
+      0: "None"
+      1: "Constant Humidity"
+
+number:
+  # Fan level (2,5)
+  - platform: miot
+    miot_siid: 2
+    miot_piid: 5
+    id: fan_level
+    name: "${name} Fan Level"
+    icon: mdi:fan
+    mode: slider
+    min_value: 0
+    max_value: 3
+    step: 1
+    internal: false
+
+  # Target humidity (2,6)
+  - platform: miot
+    miot_siid: 2
+    miot_piid: 6
+    id: target_hum
+    name: "${name} Target Humidity"
+    unit_of_measurement: "%"
+    icon: mdi:water-percent
+    mode: slider
+    min_value: 40
+    max_value: 70
+    step: 1
+    internal: false
+
