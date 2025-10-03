@@ -1,6 +1,7 @@
 # Flashing ESPHome Firmware on Xiaomi Mi Smart Humidifier 2 (MJJSQ05DY)
 
 This guide describes how to flash [ESPHome](https://esphome.io/) firmware onto the Xiaomi **Mi Smart Humidifier 2** (model `MJJSQ05DY`).
+The model has a proprietary Xiaomi wifi module `MHCWB4P-B`.
 
 ---
 
