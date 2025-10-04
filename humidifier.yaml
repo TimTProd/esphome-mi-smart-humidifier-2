@@ -79,27 +79,24 @@ button:
     name: "${name} Restart"
     entity_category: diagnostic
 
-  - platform: template
-    name: "${name} Start Humidifying"
-    icon: mdi:play
-    on_press:
-      - switch.turn_on: power_sw
-      - delay: 200ms
-      - select.set:
-          id: mode_select
-          option: "Constant Humidity"  
-      - number.set:
-          id: target_hum
-          value: 55
-      - number.set:
-          id: fan_level
-          value: 2   
+  # - platform: template
+  #   name: "${name} Start Humidifying"
+  #   icon: mdi:play
+  #   on_press:
+  #     - switch.turn_on: power_sw
+  #     - delay: 200ms
+  #     - select.set:
+  #         id: mode_select
+  #         option: "None"  
+  #     - number.set:
+  #         id: fan_level
+  #         value: 2   
 
-  - platform: template
-    name: "${name} Stop Humidifying"
-    icon: mdi:stop
-    on_press:
-      - switch.turn_off: power_sw
+  # - platform: template
+  #   name: "${name} Stop Humidifying"
+  #   icon: mdi:stop
+  #   on_press:
+  #     - switch.turn_off: power_sw
 
 binary_sensor:
   - platform: status
@@ -174,6 +171,24 @@ switch:
     id: power_sw
     internal: true
     icon: mdi:power
+  
+  - platform: template
+    id: humidifying_sw
+    name: "${name} Humidifying"
+    icon: mdi:water
+    optimistic: false
+    lambda: |-
+      return id(power_sw).state;
+
+    turn_on_action:
+      - switch.turn_on: power_sw
+      - delay: 200ms
+      - select.set:
+          id: mode_select
+          option: "None"
+
+    turn_off_action:
+      - switch.turn_off: power_sw
 
 select:
   - platform: miot
