@@ -13,6 +13,13 @@ esphome:
   project:
     name: "dhewg.esphome-miot"
     version: "deerma.humidifier.jsq2g"
+  
+  on_boot:
+    priority: -10
+    then:
+      - delay: 1s
+      - switch.turn_off: buzzer_sw
+      - switch.turn_off: led_sw
 
 rtl87xx:
   board: ${board}
@@ -30,6 +37,8 @@ wifi:
   ap:
     ssid: ${name}
     password: "aboba123"
+  
+  power_save_mode: none
 
 api:
   encryption:
@@ -189,6 +198,18 @@ switch:
 
     turn_off_action:
       - switch.turn_off: power_sw
+    
+  - platform: miot
+    miot_siid: 5
+    miot_piid: 1
+    id: buzzer_sw
+    name: "${name} Sound (Buzzer)"
+
+  - platform: miot
+    miot_siid: 6
+    miot_piid: 1
+    id: led_sw
+    name: "${name} Indicator Light"
 
 select:
   - platform: miot
@@ -229,4 +250,3 @@ number:
     max_value: 70
     step: 1
     internal: false
-
