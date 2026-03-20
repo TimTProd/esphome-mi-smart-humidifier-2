@@ -1,5 +1,5 @@
 external_components:
-  - source: github://dhewg/esphome-miot@main
+  - source: github://dhewg/esphome-miot@62b507f5326749e9b279ca78d6bc35b8036a07d8
     refresh: 0s
 
 substitutions:

@@ -63,25 +63,31 @@ Follow the instructions from [this comment](https://github.com/libretiny-eu/libr
    ltchiptool -V
    ```
 
-2. **Backup the stock firmware**:
+1. **Backup the stock firmware**:
 
    ```bash
    ltchiptool flash read -c realtek-ambz2 path/to/store/original_firmware.bin
    ```
 
-3. **Compile ESPHome config** (`humidifier.yaml` from this repo):
+1. Install esphome version 2025.9.0
+
+   ```bash
+   pip install esphome==2025.9.0
+   ```
+
+1. **Compile ESPHome config** (`humidifier.yaml` from this repo):
 
    ```bash
    esphome compile humidifier.yaml
    ```
 
-4. **Flash the ESPHome firmware** (⚠️ must use the modified `ltchiptool`, otherwise you’ll get a hash error at boot):
+1. **Flash the ESPHome firmware** (⚠️ must use the modified `ltchiptool`, otherwise you’ll get a hash error at boot):
 
    ```bash
    ltchiptool flash write .esphome/build/smart-humidifier-2/.pioenvs/smart-humidifier-2/firmware.uf2
    ```
 
-5. The device should now boot up running ESPHome. 🎉
+1. The device should now boot up running ESPHome. 🎉
 
 ---
 
