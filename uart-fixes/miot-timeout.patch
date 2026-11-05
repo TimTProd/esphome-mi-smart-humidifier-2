@@ -1,0 +1,10 @@
+diff --git a/components/miot/miot.cpp b/components/miot/miot.cpp
+--- a/components/miot/miot.cpp
++++ b/components/miot/miot.cpp
+@@ -110,5 +110,5 @@
+   uint8_t c;
+ 
+-  if (rx_count_ > 0 && millis() - last_rx_char_timestamp_ > RECEIVE_TIMEOUT) {
++  if (!this->available() && rx_count_ > 0 && millis() - last_rx_char_timestamp_ > RECEIVE_TIMEOUT) {
+     ESP_LOGE(TAG, "Timeout while receiving from MCU, dropping message '%s'", get_printable_rx_message().c_str());
+     rx_count_ = 0;

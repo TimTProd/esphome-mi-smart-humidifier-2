@@ -1,0 +1,29 @@
+diff --git a/cores/common/arduino/libraries/api/Serial/Serial.h b/cores/common/arduino/libraries/api/Serial/Serial.h
+index 1b80b68..0023db7 100644
+--- a/cores/common/arduino/libraries/api/Serial/Serial.h
++++ b/cores/common/arduino/libraries/api/Serial/Serial.h
+@@ -18,7 +18,11 @@ class SerialClass : public HardwareSerial {
+ 	void *data;
+ 
+   private:
++#if defined(LT_RTL8720C)
++	RingBufferN<512> *buf;
++#else
+ 	RingBuffer *buf;
++#endif
+ 	uint32_t baudrate;
+ 	uint16_t config;
+ 
+diff --git a/cores/realtek-ambz2/arduino/libraries/Serial/SerialPrivate.h b/cores/realtek-ambz2/arduino/libraries/Serial/SerialPrivate.h
+index 6fb1ec9..3b6bc0e 100644
+--- a/cores/realtek-ambz2/arduino/libraries/Serial/SerialPrivate.h
++++ b/cores/realtek-ambz2/arduino/libraries/Serial/SerialPrivate.h
+@@ -7,7 +7,7 @@
+ 
+ typedef struct {
+ 	hal_uart_adapter_t *uart;
+-	RingBuffer buf;
++	RingBufferN<512> buf;
+ } SerialData;
+ 
+ #define DATA   ((SerialData *)data)

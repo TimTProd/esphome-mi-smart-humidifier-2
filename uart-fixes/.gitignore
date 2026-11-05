@@ -1,0 +1,18 @@
+# Private candidate data and compiled artifacts must not be published here.
+__pycache__/
+tests/
+*.pyc
+*.yaml
+*.yml
+*.uf2
+*.bin
+*.elf
+*.map
+*.log
+*.jsonl
+.venv/
+venv/
+pio-home/
+build/
+backup/
+secrets*
